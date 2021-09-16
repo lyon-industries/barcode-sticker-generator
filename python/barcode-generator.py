@@ -18,30 +18,43 @@ while int(index) <= int(to_index):
     index = int(index) + 1
 
 
-pdf.alias_nb_pages()
-pdf.add_page()
+
 pdf.set_font('Times', '', 12)
 time.sleep(1)
 
 generated = os.listdir(outputdir)
 
-
-y = 5
-x = 5
+margin = 5
+y = margin
+x = margin
 col = 0
+barCodeWidth = 50
+barCodeHeight = 25
+labelWidth = 70
+labelHeight = 37
+pdf.add_page()
+rownumber = 1
 
-for image in sorted(generated):
+files = [os.path.join(outputdir, f) for f in generated] # add path to each file
+files.sort(key=lambda x: os.path.getmtime(x))
+
+for image in files:
     print(image)
-    pdf.image(outputdir + image, x, y, 50, 35)
-    x = x + 70
-    if x > 145:
-        x = 5
-        y = y + 40
+    pdf.image(image, x, y, barCodeWidth, barCodeHeight)
+    x = x + labelWidth
+    if x > margin + labelWidth * 2:
+        rownumber = rownumber + 1
+        x = margin
+        y = y + labelHeight
+    if rownumber > 8:
+        rownumber = 1
+        y = margin
+        pdf.add_page()
 
 
 # for i in range(1, 10):
 #    pdf.cell(0, 10, 'Printing line number ' + str(i), 0, 1)
 pdf.output("generated-pdf/" + name + ".pdf", "F")
 
-for f in os.listdir(outputdir):
+for f in generated:
     os.remove(os.path.join(outputdir, f))
